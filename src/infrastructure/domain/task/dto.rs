@@ -1,10 +1,14 @@
-use std::{fs::OpenOptions, io::Write, str::FromStr};
+use std::str::FromStr;
 
 use serde::{Deserialize, Serialize};
 use ulid::Ulid;
 
 use crate::domain::task::entity::{Task, TaskStatus};
 
+#[derive(Serialize, Deserialize)]
+pub struct ListTaskDTO {
+    pub tasks: Vec<TaskDTO>,
+}
 pub struct NewTaskDTO {
     name: String,
 }
@@ -27,6 +31,16 @@ impl TryFrom<NewTaskDTO> for Task {
     }
 }
 
+impl From<&TaskDTO> for Task {
+    fn from(dto: &TaskDTO) -> Self {
+        Self {
+            id: Ulid::from_str(&dto.id.to_string()).unwrap(),
+            name: dto.name.to_string(),
+            status: TaskStatus::from_str(&dto.status).unwrap(),
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize)]
 pub struct TaskDTO {
     id: String,
@@ -34,37 +48,12 @@ pub struct TaskDTO {
     status: String,
 }
 
-impl TaskDTO {
-    pub fn from(task: &Task) -> Self {
+impl From<&Task> for TaskDTO {
+    fn from(task: &Task) -> Self {
         Self {
             id: task.id.to_string(),
             name: task.name.to_string(),
             status: task.status.to_string(),
-        }
-    }
-
-    pub fn save(&self) -> Result<&TaskDTO, std::io::Error> {
-        let mut f = OpenOptions::new()
-            .create(true)
-            .write(true)
-            .truncate(true)
-            .open("task.json")
-            .unwrap();
-        let result = f.write(serde_json::to_string(self).unwrap().as_bytes());
-        f.flush().unwrap();
-        match result {
-            Ok(_) => Ok(self),
-            Err(err) => Err(err),
-        }
-    }
-}
-
-impl Task {
-    pub fn from(dto: &TaskDTO) -> Self {
-        Self {
-            id: Ulid::from_string(&dto.id).unwrap(),
-            name: dto.name.to_string(),
-            status: TaskStatus::from_str(&dto.status).unwrap(),
         }
     }
 }

@@ -9,4 +9,5 @@ pub struct Cli {
 #[derive(StructOpt)]
 pub enum Command {
     Add { arg: String },
+    List,
 }

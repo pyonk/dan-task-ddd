@@ -20,6 +20,11 @@ fn main() {
                     panic!("{}", err)
                 }
             },
+            Command::List => {
+                for task in task_service.list() {
+                    println!("{}:[{}] {}", task.id, task.status, task.name)
+                }
+            }
         },
         None => {
             println!("No Command")

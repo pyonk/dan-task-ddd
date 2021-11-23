@@ -21,4 +21,8 @@ where
         let task = Task::try_from(dto).unwrap();
         self.task_repository.create(&task)
     }
+
+    pub fn list(&self) -> Vec<Task> {
+        self.task_repository.all()
+    }
 }
